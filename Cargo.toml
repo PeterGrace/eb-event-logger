@@ -20,3 +20,4 @@ serde_json = "1.0.135"
 reqwest = { version = "0.12.12",features = ["rustls-tls"] }
 dotenv = { version = "0.15.0"}
 base64 = { version = "0.22.1" }
+openssl = { version = "0.10", features = ["vendored"] }

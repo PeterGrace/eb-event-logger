@@ -45,14 +45,21 @@ async fn main() {
 
     dotenv();
 
+    // are we in a shell with aws access?
+    let aws_key = env::var("AWS_ACCESS_KEY_ID").ok();
+    if aws_key.is_none() {
+        error!("You must pass in the AWS_ACCESS_KEY_ID/AWS_SECRET_ACCESS_KEY env vars to use this tool.");
+        std::process::exit(1);
+    };
+
     let logger_url = env::var("EB_EVENT_LOGGER_URL").ok();
     if logger_url.is_none() {
         error!("You must specify EB_EVENT_LOGGER_URL to send logs somewhere");
         std::process::exit(1);
     };
+
     let logger_user = env::var("EB_EVENT_LOGGER_USER").ok();
     let logger_password = env::var("EB_EVENT_LOGGER_PASSWORD").ok();
-
     let mut headers: HeaderMap = HeaderMap::new();
     if logger_user.is_some()  {
         if logger_password.is_none(){
@@ -64,7 +71,6 @@ async fn main() {
         let auth_str = format!("Basic {b64}");
         headers.insert(HeaderName::from_str("Authorization").unwrap(),HeaderValue::from_str(&auth_str).unwrap());
     }
-
 
     let logger_client = ClientBuilder::new().default_headers(headers).use_rustls_tls().build().expect("Could not build reqwest client");
 

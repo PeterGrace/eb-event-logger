@@ -1,0 +1,6 @@
+services:
+  eb_event_logger:
+    image: petergrace/eb-event-logger:latest
+    restart: unless-stopped
+    env_file:
+      - .env
