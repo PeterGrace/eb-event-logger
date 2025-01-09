@@ -10,7 +10,7 @@ all: build make-image
 build:
   cross build --release --target x86_64-unknown-linux-gnu
 make-image:
-  docker buildx build --no-cache --push --platform linux/amd64 \
+  docker buildx build --push --platform linux/amd64 \
   -t {{registry}}/{{image}}:latest \
   -t {{registry}}/{{image}}:{{shortcommit}} \
   -t {{registry}}/{{image}}:{{commit}} \
