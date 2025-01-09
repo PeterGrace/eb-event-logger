@@ -1,5 +1,5 @@
 [package]
-name = "rust-template"
+name = "eb-event-logger"
 version = "0.1.0"
 edition = "2021"
 
@@ -8,7 +8,15 @@ ctrlc = { version = "3.4.5", features = ["termination"] }
 lazy_static = "1.5.0"
 serde = { version = "1.0.216", features = ["derive"] }
 thiserror = "2.0.6"
-tokio = { version = "1.42.0", features = ["rt-multi-thread", "macros", "time"] }
+tokio = { version = "1.42.0", features = ["rt-multi-thread", "macros"] }
 tracing = "0.1.41"
 tracing-log = "0.2.0"
 tracing-subscriber = { version = "0.3.19", features = ["fmt", "env-filter"] }
+aws-sdk-elasticbeanstalk = { version = "1.54.0", features = ["rt-tokio","rustls"] }
+aws-config = { version = "1.5.13", features = ["rt-tokio","rustls"] }
+aws-smithy-types-convert = { version = "0.60.8", features = ["convert-chrono"] }
+chrono = "0.4.39"
+serde_json = "1.0.135"
+reqwest = { version = "0.12.12",features = ["rustls-tls"] }
+dotenv = { version = "0.15.0"}
+base64 = { version = "0.22.1" }
