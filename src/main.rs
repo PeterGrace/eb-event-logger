@@ -39,8 +39,10 @@ async fn main() {
 
     // are we in a shell with aws access?
     let aws_key = env::var("AWS_ACCESS_KEY_ID").ok();
-    if aws_key.is_none() {
-        error!("You must pass in the AWS_ACCESS_KEY_ID/AWS_SECRET_ACCESS_KEY env vars to use this tool.");
+    let aws_token = env::var("AWS_WEB_IDENTITY_TOKEN_FILE").ok();
+    let aws_container_token = env::var("AWS_CONTAINER_AUTHORIZATION_TOKEN").ok();
+    if aws_key.is_none() && aws_token.is_none() && aws_container_token.is_none() {
+        error!("Could not find proper AWS credentials in the environment variable list.");
         std::process::exit(1);
     };
 
