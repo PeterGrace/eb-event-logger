@@ -3,18 +3,10 @@ pub mod ed_newtype;
 #[macro_use] extern crate tracing;
 
 use std::collections::HashMap;
-use std::fmt::{Debug, Display, Formatter};
 use aws_config::meta::region::RegionProviderChain;
 use aws_config::BehaviorVersion;
-use aws_sdk_elasticbeanstalk::config::http::HttpResponse;
-use aws_sdk_elasticbeanstalk::operation::describe_events::{DescribeEventsError, DescribeEventsOutput};
-use aws_sdk_elasticbeanstalk::types::{EventDescription, EventSeverity};
-use serde::{Serialize, Serializer};
-use serde::ser::SerializeStruct;
 use tracing_subscriber::EnvFilter;
 use aws_smithy_types_convert::date_time::DateTimeExt;
-use std::fs::OpenOptions;
-use std::io::prelude::*;
 use std::time::Duration;
 use aws_sdk_elasticbeanstalk::primitives::DateTime as aws_datetime;
 use tokio::time::sleep;
@@ -22,7 +14,7 @@ use crate::ed_newtype::MyEventDescription;
 use std::env;
 use dotenv::dotenv;
 use std::collections::VecDeque;
-use reqwest::{ClientBuilder, Error, Response, StatusCode};
+use reqwest::{ClientBuilder, StatusCode};
 use reqwest::header::{HeaderMap, HeaderName, HeaderValue};
 use base64::prelude::*;
 use std::str::FromStr;
@@ -43,7 +35,7 @@ async fn main() {
         .with_line_number(true)
         .init();
 
-    dotenv();
+    let _ = dotenv();
 
     // are we in a shell with aws access?
     let aws_key = env::var("AWS_ACCESS_KEY_ID").ok();
@@ -96,13 +88,13 @@ async fn main() {
         }
         for (env_name,start_time) in last_msg.clone().iter() {
             info!("Querying for latest events in {} since {}", &env_name, start_time);
-            let mut stream = client.describe_events().start_time((*start_time).into()).environment_id(env_name).into_paginator().send();
+            let mut stream = client.describe_events().start_time(*start_time).environment_id(env_name).into_paginator().send();
             match stream.try_next().await {
                 Ok(maybe_event) => {
                     if let Some(output) = maybe_event {
                         let m = output.events.unwrap();
                         for event in m {
-                            let mut timestamp: aws_datetime = event.event_date.clone().unwrap();
+                            let mut timestamp: aws_datetime = event.event_date.unwrap();
                             let med: MyEventDescription = MyEventDescription(event);
                             if let Ok(mut val) = serde_json::to_value(&med) {
                                 let obj = val.as_object_mut().unwrap();
@@ -119,7 +111,7 @@ async fn main() {
                                 let mut ts = timestamp.secs();
                                 ts+=1;
                                 timestamp.set_seconds(ts);
-                                last_msg.insert(String::from(env_name.clone()), timestamp);
+                                last_msg.insert(env_name.clone(), timestamp);
                             }
 
                         }
